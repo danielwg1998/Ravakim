@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>הרווקים 🎉 | בני ויהב</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --pink:   #ff0077;
+      --cyan:   #00ffcc;
+      --purple: #cc00ff;
+      --orange: #ff9900;
+      --blue:   #00aaff;
+      --bg:     #07070f;
+      --bg2:    #0d0d1a;
+      --card:   rgba(255,255,255,0.04);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      font-family: 'Heebo', sans-serif;
+      color: #fff;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* ── Scanline overlay ── */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent, transparent 2px,
+        rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ── Floating heads ── */
+    .head {
+      position: fixed;
+      border-radius: 50%;
+      object-fit: cover;
+      opacity: 0.28;
+      pointer-events: none;
+      z-index: 0;
+      filter: grayscale(20%) contrast(1.1);
+      will-change: transform;
+    }
+
+    /* ── Neon helpers ── */
+    .glow-pink   { color: var(--pink);   text-shadow: 0 0 12px var(--pink),   0 0 40px var(--pink),   0 0 80px var(--pink); }
+    .glow-cyan   { color: var(--cyan);   text-shadow: 0 0 12px var(--cyan),   0 0 40px var(--cyan); }
+    .glow-purple { color: var(--purple); text-shadow: 0 0 12px var(--purple), 0 0 40px var(--purple); }
+    .glow-orange { color: var(--orange); text-shadow: 0 0 12px var(--orange), 0 0 30px var(--orange); }
+    .glow-blue   { color: var(--blue);   text-shadow: 0 0 12px var(--blue),   0 0 30px var(--blue); }
+
+    @keyframes pulsePink {
+      0%,100% { text-shadow: 0 0 15px var(--pink), 0 0 40px var(--pink),  0 0 80px var(--pink); }
+      50%      { text-shadow: 0 0 25px var(--pink), 0 0 80px var(--pink), 0 0 160px var(--pink); }
+    }
+    .pulse-pink { animation: pulsePink 2.4s ease-in-out infinite; }
+
+    /* ── Hero ── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .hero-photos {
+      position: absolute; inset: 0;
+      display: flex;
+    }
+    .hero-photo {
+      width: 50%; height: 100%;
+      object-fit: cover;
+      object-position: center top;
+    }
+    .hero-seam {
+      position: absolute;
+      left: 50%; top: 0; bottom: 0; width: 3px;
+      transform: translateX(-50%);
+      background: linear-gradient(to bottom, transparent 0%, var(--pink) 25%, var(--cyan) 75%, transparent 100%);
+      box-shadow: 0 0 18px var(--pink), 0 0 40px var(--pink);
+    }
+    .hero-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(7,7,15,0.25) 0%,
+        rgba(7,7,15,0.45) 40%,
+        rgba(7,7,15,0.85) 75%,
+        rgba(7,7,15,1.00) 100%
+      );
+    }
+    .hero-content {
+      position: relative; z-index: 2;
+      text-align: center;
+      padding: 2rem;
+      width: 100%;
+    }
+
+    /* ── Section ── */
+    .section {
+      position: relative; z-index: 1;
+      padding: 5rem 1.5rem;
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+
+    /* ── Neon divider ── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--pink), var(--cyan), transparent);
+      box-shadow: 0 0 10px var(--pink);
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    /* ── Toggle buttons ── */
+    .toggler {
+      display: inline-flex;
+      border: 1.5px solid rgba(0,255,204,0.35);
+      border-radius: 50px;
+      overflow: hidden;
+    }
+    .toggle-btn {
+      padding: 0.6rem 1.6rem;
+      font-family: 'Heebo', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.5);
+      transition: all 0.25s;
+    }
+    .toggle-btn.on {
+      background: var(--cyan);
+      color: #07070f;
+      box-shadow: 0 0 20px var(--cyan), 0 0 40px rgba(0,255,204,0.3);
+    }
+
+    /* ── Full schedule table ── */
+    .sched-wrap {
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(0,255,204,0.15);
+      box-shadow: 0 0 40px rgba(0,255,204,0.05);
+    }
+    .sched-table {
+      width: 100%;
+      border-collapse: collapse;
+      direction: rtl;
+    }
+    .sched-table th {
+      padding: 14px 18px;
+      font-size: 1rem;
+      font-weight: 900;
+      background: rgba(0,255,204,0.06);
+      border-bottom: 1px solid rgba(0,255,204,0.2);
+      border-left: 1px solid rgba(255,255,255,0.05);
+    }
+    .sched-table td {
+      padding: 10px 14px;
+      font-size: 0.88rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      border-left: 1px solid rgba(255,255,255,0.04);
+      vertical-align: top;
+      line-height: 1.5;
+    }
+    .sched-table tbody tr:last-child td { border-bottom: none; }
+    .sched-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+    .sched-table .t-time  { color: var(--cyan);   font-weight: 700; white-space: nowrap; font-size: 0.82rem; }
+    .sched-table .t-thu   { color: var(--orange); }
+    .sched-table .t-fri   { color: var(--blue);   }
+    .sched-table .t-sat   { color: #ff55bb;       }
+
+    /* ── Day card ── */
+    .day-card {
+      background: linear-gradient(135deg, rgba(20,20,35,0.95), rgba(10,10,22,0.98));
+      border-radius: 20px;
+      padding: 2rem 1.5rem;
+      border: 1px solid rgba(204,0,255,0.25);
+      box-shadow: 0 0 50px rgba(204,0,255,0.07), inset 0 0 50px rgba(204,0,255,0.03);
+    }
+
+    /* ── Timeline item ── */
+    .tl-item {
+      display: flex;
+      gap: 0.8rem;
+      align-items: flex-start;
+      direction: rtl;
+    }
+    .tl-track {
+      display: flex; flex-direction: column; align-items: center;
+      min-width: 14px; flex-shrink: 0;
+    }
+    .tl-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+    .tl-line {
+      width: 2px;
+      flex-grow: 1;
+      min-height: 18px;
+      margin-top: 3px;
+    }
+
+    /* ── Nav buttons ── */
+    .nav-btn {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      border: 2px solid var(--purple);
+      background: transparent;
+      color: var(--purple);
+      font-size: 1.4rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 12px rgba(204,0,255,0.3);
+      transition: all 0.2s;
+      font-family: monospace;
+    }
+    .nav-btn:hover {
+      background: var(--purple);
+      color: #fff;
+      box-shadow: 0 0 25px var(--purple);
+    }
+
+    /* ── Couple badges ── */
+    .couple-badge {
+      display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+    }
+    .couple-badge .emoji { font-size: 1.8rem; }
+    .couple-badge .name  { font-weight: 900; font-size: 1rem; }
+
+    /* ── Scroll arrow ── */
+    @keyframes arrowBounce {
+      0%,100% { transform: translateY(0); opacity: 0.6; }
+      50%      { transform: translateY(10px); opacity: 1; }
+    }
+    .arrow-bounce { animation: arrowBounce 1.8s ease-in-out infinite; }
+
+    /* ── Day dots ── */
+    .day-dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.25s;
+      border: none;
+      outline: none;
+    }
+
+    /* ── Entry screen ── */
+    @keyframes fadeOutUp {
+      0%   { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-60px); }
+    }
+    .entry-screen {
+      position: fixed; inset: 0; z-index: 10000;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      background: var(--bg);
+      text-align: center; padding: 2rem;
+    }
+    .entry-screen.leaving {
+      animation: fadeOutUp 0.7s cubic-bezier(0.4,0,0.2,1) forwards;
+      pointer-events: none;
+    }
+    @keyframes bigPulse {
+      0%,100% { box-shadow: 0 0 30px var(--pink), 0 0 80px var(--pink), 0 0 0 0 rgba(255,0,119,0.4); transform: scale(1); }
+      50%      { box-shadow: 0 0 50px var(--pink), 0 0 120px var(--pink), 0 0 0 12px rgba(255,0,119,0); transform: scale(1.04); }
+    }
+    .enter-btn {
+      margin-top: 2.5rem;
+      padding: 1.2rem 3.5rem;
+      font-family: 'Heebo', sans-serif;
+      font-size: clamp(1.6rem, 6vw, 2.4rem);
+      font-weight: 900;
+      color: #07070f;
+      background: var(--pink);
+      border: none; border-radius: 100px;
+      cursor: pointer;
+      animation: bigPulse 1.8s ease-in-out infinite;
+      letter-spacing: 0.03em;
+    }
+    .enter-btn:active { transform: scale(0.96); }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .sched-table th, .sched-table td { padding: 8px 8px; font-size: 0.78rem; }
+      .section { padding: 3.5rem 1rem; }
+      .day-card { padding: 1.5rem 1rem; }
+
+      /* Fix right image (beni_netta, first-child in RTL) alignment on mobile */
+      .hero-photo { object-fit: cover; object-position: center top; }
+      .hero-photo:first-child { object-position: center center; }
+    }
+
+    @media (max-width: 400px) {
+      .sched-table th, .sched-table td { padding: 6px 5px; font-size: 0.7rem; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    /* ── All heads in one shared physics loop (snooker collisions) ── */
+    function FloatingHeads({ headsConfig }) {
+      const imgRefsRef = useRef(null);
+      if (!imgRefsRef.current) {
+        imgRefsRef.current = headsConfig.map(() => React.createRef());
+      }
+      const state = useRef(headsConfig.map(h => ({ x: h.x0, y: h.y0, dx: h.vx, dy: h.vy, size: h.size })));
+
+      useEffect(() => {
+        let id;
+        const tick = () => {
+          const balls = state.current;
+
+          // Move
+          balls.forEach(b => { b.x += b.dx; b.y += b.dy; });
+
+          // Wall bounce
+          balls.forEach(b => {
+            const mxX = window.innerWidth  - b.size;
+            const mxY = window.innerHeight - b.size;
+            if (b.x <= 0)   { b.x = 0;   b.dx =  Math.abs(b.dx); }
+            if (b.x >= mxX) { b.x = mxX; b.dx = -Math.abs(b.dx); }
+            if (b.y <= 0)   { b.y = 0;   b.dy =  Math.abs(b.dy); }
+            if (b.y >= mxY) { b.y = mxY; b.dy = -Math.abs(b.dy); }
+          });
+
+          // Ball-ball elastic collisions (equal mass → swap normal components)
+          for (let i = 0; i < balls.length; i++) {
+            for (let j = i + 1; j < balls.length; j++) {
+              const a = balls[i], b = balls[j];
+              const r = (a.size + b.size) / 2;           // sum of radii
+              const cax = a.x + a.size / 2, cay = a.y + a.size / 2;
+              const cbx = b.x + b.size / 2, cby = b.y + b.size / 2;
+              const dist = Math.sqrt((cbx - cax) ** 2 + (cby - cay) ** 2);
+
+              if (dist > 0 && dist < r) {
+                const nx = (cbx - cax) / dist;
+                const ny = (cby - cay) / dist;
+                const dvn = (a.dx - b.dx) * nx + (a.dy - b.dy) * ny;
+                if (dvn > 0) {                          // only if approaching
+                  a.dx -= dvn * nx;  a.dy -= dvn * ny;
+                  b.dx += dvn * nx;  b.dy += dvn * ny;
+                  // Separate overlapping circles
+                  const overlap = (r - dist) / 2;
+                  a.x -= overlap * nx;  a.y -= overlap * ny;
+                  b.x += overlap * nx;  b.y += overlap * ny;
+                }
+              }
+            }
+          }
+
+          // Update DOM
+          balls.forEach((b, i) => {
+            const el = imgRefsRef.current[i].current;
+            if (el) { el.style.left = b.x + 'px'; el.style.top = b.y + 'px'; }
+          });
+          id = requestAnimationFrame(tick);
+        };
+        id = requestAnimationFrame(tick);
+        return () => cancelAnimationFrame(id);
+      }, []);
+
+      return (
+        <>
+          {headsConfig.map((h, i) => (
+            <img key={i} ref={imgRefsRef.current[i]} src={h.src} className="head"
+              style={{ width: h.size, height: h.size, left: h.x0, top: h.y0 }} alt="" />
+          ))}
+        </>
+      );
+    }
+
+    /* ── Schedule data ── */
+    // fri: null  → cell is covered by a rowspan above (skip rendering)
+    // friSpan: N → rowspan=N on this cell
+    const TABLE_ROWS = [
+      { time: '9:00–11:00',   thu: 'סופר 🛒',                                   fri: 'טיול 🥾', friSpan: 5, sat: 'ארוחת בוקר ושיל 🍳' },
+      { time: '11:00–12:00',  thu: 'איסוף חתנים ויציאה מתא 🚗',                 fri: null,                  sat: 'נוסעים הביתה 🏠' },
+      { time: '12:00–14:00',  thu: 'נסיעה לקליה 🏜️',                            fri: null,                  sat: '' },
+      { time: '14:00–15:30',  thu: 'פיינטבול קליה 🔫',                           fri: null,                  sat: '' },
+      { time: '15:30–16:00',  thu: 'נסיעה למצוקי דרגות 🏔️',                     fri: null,                  sat: '' },
+      { time: '16:00–18:00',  thu: 'מורידים פאניקה + אלכוהול ואוכל 🪂🍺',        fri: 'מתארגנים 🏠',         sat: '' },
+      { time: '18:00–20:00',  thu: 'מעיינות חמים ♨️',                           fri: 'מבשלים ושותים 🍳🍷',  sat: '' },
+      { time: '20:00+',       thu: 'בר של המקום 🍹',                             fri: 'אוכל + שותים 🍻',     sat: '' },
+      { time: 'מאוחר',        thu: '',                                            fri: 'קהוט + שותים 🎮🍺',   sat: '' },
+      { time: 'יותר מאוחר',  thu: '',                                            fri: 'משחק שתייה + שותים 🎲', sat: '' },
+      { time: 'כל הלילה',    thu: '',                                            fri: 'שותים... 😵',         sat: '' },
+    ];
+
+    const DAYS = [
+      {
+        key: 'thu', name: 'חמישי', emoji: '🌅', color: '#ff9900',
+        events: [
+          { time: '9:00–11:00',  text: 'סופר',                              icon: '🛒' },
+          { time: '11:00–12:00', text: 'איסוף חתנים ויציאה מתא',            icon: '🚗' },
+          { time: '12:00–14:00', text: 'נסיעה לקליה',                       icon: '🏜️' },
+          { time: '14:00–15:30', text: 'פיינטבול קליה',                     icon: '🔫' },
+          { time: '15:30–16:00', text: 'נסיעה למצוקי דרגות',                icon: '🏔️' },
+          { time: '16:00–18:00', text: 'מורידים פאניקה + אלכוהול ואוכל',   icon: '🪂🍺' },
+          { time: '18:00–20:00', text: 'מעיינות חמים',                      icon: '♨️' },
+          { time: '20:00+',      text: 'בר של המקום',                       icon: '🍹' },
+        ],
+      },
+      {
+        key: 'fri', name: 'שישי', emoji: '🌊', color: '#00aaff',
+        events: [
+          { time: 'בוקר',        text: 'טיול',                   icon: '🥾' },
+          { time: '16:00–18:00', text: 'מתארגנים',               icon: '🏠' },
+          { time: '18:00–20:00', text: 'מבשלים ושותים',           icon: '🍳🍷' },
+          { time: '20:00+',      text: 'אוכל + שותים',            icon: '🍻' },
+          { time: 'מאוחר',       text: 'קהוט + שותים',            icon: '🎮🍺' },
+          { time: 'יותר מאוחר', text: 'משחק שתייה + שותים',       icon: '🎲' },
+          { time: 'כל הלילה',   text: 'שותים...',                icon: '😵' },
+        ],
+      },
+      {
+        key: 'sat', name: 'שבת', emoji: '🌙', color: '#ff55bb',
+        events: [
+          { time: 'בוקר',  text: 'ארוחת בוקר ושיל', icon: '🍳' },
+          { time: 'מאוחר', text: 'נוסעים הביתה',    icon: '🏠' },
+        ],
+      },
+    ];
+
+    const HEADS = [
+      { src: './assets/beni.png',   size: 100, vx:  1.3, vy:  0.8, x0:  80,  y0: 220 },
+      { src: './assets/netta.png',  size:  88, vx: -0.9, vy:  1.2, x0: 450,  y0: 520 },
+      { src: './assets/yahav.png',  size: 112, vx:  1.6, vy: -0.7, x0: 720,  y0: 310 },
+      { src: './assets/aya.png',    size:  94, vx: -1.1, vy: -1.0, x0: 280,  y0:  90 },
+    ];
+
+    /* ── Main App ── */
+    function App() {
+      const [view, setView]       = useState('full');   // 'full' | 'day'
+      const [dayIdx, setDayIdx]   = useState(0);
+      const [entered, setEntered] = useState(false);    // entry screen
+      const [leaving, setLeaving] = useState(false);
+      const audioRef              = useRef(null);
+
+      function handleEnter() {
+        // Play music (user gesture unlocks autoplay)
+        if (audioRef.current) {
+          audioRef.current.volume = 0.6;
+          audioRef.current.play().catch(() => {});
+        }
+        // Trigger exit animation, then hide overlay
+        setLeaving(true);
+        setTimeout(() => setEntered(true), 680);
+      }
+
+      const day = DAYS[dayIdx];
+
+      const prev = () => setDayIdx(i => (i - 1 + DAYS.length) % DAYS.length);
+      const next = () => setDayIdx(i => (i + 1) % DAYS.length);
+
+      return (
+        <div style={{ position: 'relative', minHeight: '100vh' }}>
+
+          {/* ── Hidden audio ── */}
+          <audio ref={audioRef} src="./assets/hatikva.mp3" loop />
+
+          {/* ── Entry screen ── */}
+          {!entered && (
+            <div className={`entry-screen${leaving ? ' leaving' : ''}`}>
+              {/* background glow blobs */}
+              <div style={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(255,0,119,0.12) 0%, transparent 70%)',
+                top: '10%', left: '20%', pointerEvents: 'none' }} />
+              <div style={{ position: 'absolute', width: 300, height: 300, borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(0,255,204,0.08) 0%, transparent 70%)',
+                bottom: '15%', right: '15%', pointerEvents: 'none' }} />
+
+              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 'clamp(1rem,3vw,1.3rem)',
+                fontWeight: 400, letterSpacing: '0.03em', marginBottom: '0.5rem' }}>
+                תלחץ אם המשפט הבא תקף אליך:
+              </p>
+              <button className="enter-btn" onClick={handleEnter}>״לי לח״</button>
+            </div>
+          )}
+
+          {/* ── Floating heads (fixed layer) ── */}
+          <FloatingHeads headsConfig={HEADS} />
+
+          {/* ═══════════════════════════════════════════
+              HERO
+          ═══════════════════════════════════════════ */}
+          <section className="hero">
+            <div className="hero-photos">
+              <img className="hero-photo" src="./assets/beni_netta.jpg" alt="בני ונטה" />
+              <img className="hero-photo" src="./assets/yahav_aya.jpg"  alt="יהב ואיה" />
+              <div className="hero-seam" />
+            </div>
+            <div className="hero-overlay" />
+
+            <div className="hero-content">
+              {/* eyebrow */}
+              <p style={{ letterSpacing: '0.35em', fontSize: '0.85rem', color: 'rgba(255,255,255,0.55)', marginBottom: '1rem', textTransform: 'uppercase' }}>
+                ✦ האירוע הגדול ✦
+              </p>
+
+              {/* main title */}
+              <h1 className="glow-pink pulse-pink"
+                style={{ fontSize: 'clamp(3.2rem, 12vw, 7.5rem)', fontWeight: 900, lineHeight: 1, marginBottom: '0.6rem' }}>
+                הרווקים 🎉
+              </h1>
+
+              {/* subtitle */}
+              <p className="glow-cyan"
+                style={{ fontSize: 'clamp(1rem, 3.5vw, 1.45rem)', fontWeight: 700, marginBottom: '2.5rem', letterSpacing: '0.04em' }}>
+                ״המסיבה האחרונה״
+              </p>
+
+              {/* couples */}
+              <div style={{ display: 'flex', gap: '2.5rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '2.5rem' }}>
+                <div className="couple-badge">
+                  <span className="emoji">💍</span>
+                  <span className="name glow-orange">בני ונטע</span>
+                </div>
+                <span style={{ fontSize: '1.8rem', alignSelf: 'center', opacity: 0.4 }}>✦</span>
+                <div className="couple-badge">
+                  <span className="emoji">💍</span>
+                  <span className="name glow-blue">יהב ואיה</span>
+                </div>
+              </div>
+
+              {/* scroll hint */}
+              <div className="arrow-bounce" style={{ color: 'rgba(255,255,255,0.4)', fontSize: '1.6rem', userSelect: 'none' }}>↓</div>
+            </div>
+          </section>
+
+          {/* divider */}
+          <div className="divider" />
+
+          {/* ═══════════════════════════════════════════
+              SCHEDULE
+          ═══════════════════════════════════════════ */}
+          <section className="section">
+
+            {/* section title */}
+            <h2 className="glow-purple"
+              style={{ textAlign: 'center', fontSize: 'clamp(1.8rem, 6vw, 3rem)', fontWeight: 900, marginBottom: '2.2rem' }}>
+              התוכנית 📋
+            </h2>
+
+            {/* toggle */}
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2.5rem' }}>
+              <div className="toggler">
+                <button className={`toggle-btn${view === 'full' ? ' on' : ''}`} onClick={() => setView('full')}>
+                  כל הלוח 📊
+                </button>
+                <button className={`toggle-btn${view === 'day' ? ' on' : ''}`} onClick={() => setView('day')}>
+                  יום יום 📅
+                </button>
+              </div>
+            </div>
+
+            {/* ── Full table view ── */}
+            {view === 'full' && (
+              <div className="sched-wrap" style={{ overflowX: 'auto' }}>
+                <table className="sched-table" style={{ minWidth: 480 }}>
+                  <thead>
+                    <tr>
+                      <th className="t-time" style={{ textAlign: 'right' }}>🕐 שעה</th>
+                      <th style={{ color: '#ff9900', textShadow: '0 0 10px #ff990077' }}>חמישי 🌅</th>
+                      <th style={{ color: '#00aaff', textShadow: '0 0 10px #00aaff77' }}>שישי 🌊</th>
+                      <th style={{ color: '#ff55bb', textShadow: '0 0 10px #ff55bb77' }}>שבת 🌙</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {TABLE_ROWS.map((row, i) => (
+                      <tr key={i}>
+                        <td className="t-time">{row.time}</td>
+                        <td className="t-thu">{row.thu}</td>
+                        {row.fri !== null && (
+                          <td className="t-fri"
+                            rowSpan={row.friSpan || 1}
+                            style={row.friSpan ? {
+                              verticalAlign: 'middle', textAlign: 'center',
+                              fontWeight: 800, fontSize: '1.05rem',
+                              background: 'rgba(0,170,255,0.07)',
+                              borderLeft: '2px solid rgba(0,170,255,0.3)',
+                            } : {}}>
+                            {row.fri}
+                          </td>
+                        )}
+                        <td className="t-sat">{row.sat}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* ── Day-by-day view ── */}
+            {view === 'day' && (
+              <div>
+                {/* nav + day title */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1.5rem', marginBottom: '1.2rem' }}>
+                  <button className="nav-btn" onClick={prev} title="הקודם" style={{ direction: 'ltr' }}>›</button>
+
+                  <div style={{ textAlign: 'center', minWidth: 160 }}>
+                    <div style={{ fontSize: '2.4rem', lineHeight: 1 }}>{day.emoji}</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 900, color: day.color, textShadow: `0 0 16px ${day.color}` }}>
+                      {day.name}
+                    </div>
+                    <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.8rem', marginTop: '0.15rem' }}>
+                      יום {dayIdx + 1} מתוך 3
+                    </div>
+                  </div>
+
+                  <button className="nav-btn" onClick={next} title="הבא" style={{ direction: 'ltr' }}>‹</button>
+                </div>
+
+                {/* dots */}
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                  {DAYS.map((d, i) => (
+                    <button key={i} className="day-dot"
+                      onClick={() => setDayIdx(i)}
+                      style={{
+                        background: i === dayIdx ? day.color : 'rgba(255,255,255,0.18)',
+                        boxShadow:  i === dayIdx ? `0 0 10px ${day.color}` : 'none',
+                      }}
+                    />
+                  ))}
+                </div>
+
+                {/* card */}
+                <div className="day-card" style={{ borderColor: day.color + '44', boxShadow: `0 0 50px ${day.color}12, inset 0 0 50px ${day.color}05` }}>
+                  {day.events.map((ev, i) => (
+                    <div key={i} className="tl-item"
+                      style={{ paddingBottom: i < day.events.length - 1 ? '1rem' : 0 }}>
+
+                      {/* track */}
+                      <div className="tl-track">
+                        <div className="tl-dot" style={{ background: day.color, boxShadow: `0 0 8px ${day.color}` }} />
+                        {i < day.events.length - 1 && (
+                          <div className="tl-line"
+                            style={{ background: `linear-gradient(to bottom, ${day.color}88, transparent)` }} />
+                        )}
+                      </div>
+
+                      {/* content */}
+                      <div style={{ flex: 1, paddingBottom: i < day.events.length - 1 ? '0.2rem' : 0 }}>
+                        <div style={{ color: day.color, fontSize: '0.78rem', fontWeight: 700, opacity: 0.85, marginBottom: '0.15rem' }}>
+                          {ev.time}
+                        </div>
+                        <div style={{ fontSize: '1rem', fontWeight: 700, lineHeight: 1.4 }}>
+                          {ev.text}&nbsp;{ev.icon}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
+
+          {/* divider */}
+          <div className="divider" />
+
+          {/* footer */}
+          <footer style={{ textAlign: 'center', padding: '2.5rem 1rem', color: 'rgba(255,255,255,0.28)', fontSize: '0.85rem' }}>
+            <div style={{ fontSize: '2rem', marginBottom: '0.4rem' }}>🥂</div>
+            <div>לחיים לחתנים - בני יהב וכל הבחורים! 🎊</div>
+            <div style={{ marginTop: '0.3rem', letterSpacing: '0.1em', fontSize: '0.75rem' }}>
+              &copy; {new Date().getFullYear()} כל הבנות זונות חוץ מאבא הפקות
+            </div>
+            </footer>
+
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

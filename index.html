@@ -304,26 +304,14 @@
       .section { padding: 3.5rem 1rem; }
       .day-card { padding: 1.5rem 1rem; }
 
-      /* הגדרה כללית לתמונות ההירו במובייל */
-      .hero-photo { 
-        object-fit: cover; 
-      }
-
-      /* התמונה של בני (הראשונה) - נזיז אותה כדי שיראו את הפנים שלו */
-      .hero-photo:first-child { 
-        object-position: 85% center; 
-      }
-
-      /* התמונה של יהב (השנייה) - נזיז אותה קצת לצד השני */
-      .hero-photo:nth-child(2) { 
-        object-position: 15% center; 
-      }
+      /* Fix right image (beni_netta, first-child in RTL) alignment on mobile */
+      .hero-photo { object-fit: cover; object-position: center top; }
+      .hero-photo:first-child { object-position: center center; }
     }
 
     @media (max-width: 400px) {
       .sched-table th, .sched-table td { padding: 6px 5px; font-size: 0.7rem; }
     }
-    
   </style>
 </head>
 <body>

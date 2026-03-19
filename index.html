@@ -304,14 +304,26 @@
       .section { padding: 3.5rem 1rem; }
       .day-card { padding: 1.5rem 1rem; }
 
-      /* Fix right image (beni_netta, first-child in RTL) alignment on mobile */
-      .hero-photo { object-fit: cover; object-position: center top; }
-      .hero-photo:first-child { object-position: center center; }
+      /* הגדרה כללית לתמונות ההירו במובייל */
+      .hero-photo { 
+        object-fit: cover; 
+      }
+
+      /* התמונה של בני (הראשונה) - נזיז אותה כדי שיראו את הפנים שלו */
+      .hero-photo:first-child { 
+        object-position: 85% center; 
+      }
+
+      /* התמונה של יהב (השנייה) - נזיז אותה קצת לצד השני */
+      .hero-photo:nth-child(2) { 
+        object-position: 15% center; 
+      }
     }
 
     @media (max-width: 400px) {
       .sched-table th, .sched-table td { padding: 6px 5px; font-size: 0.7rem; }
     }
+    
   </style>
 </head>
 <body>
@@ -396,11 +408,11 @@
     // fri: null  → cell is covered by a rowspan above (skip rendering)
     // friSpan: N → rowspan=N on this cell
     const TABLE_ROWS = [
-      { time: '9:00–11:00',   thu: 'סופר 🛒',                                   fri: 'טיול 🥾', friSpan: 5, sat: 'ארוחת בוקר ושיל 🍳' },
+      { time: '9:00–11:00',   thu: 'סופר 🛒',                                   fri: 'טיול בנחל תקוע/שיטפון 🥾', friSpan: 5, sat: 'שקשוקי ושיל 🍳' },
       { time: '11:00–12:00',  thu: 'איסוף חתנים ויציאה מתא 🚗',                 fri: null,                  sat: 'נוסעים הביתה 🏠' },
-      { time: '12:00–14:00',  thu: 'נסיעה לקליה 🏜️',                            fri: null,                  sat: '' },
-      { time: '14:00–15:30',  thu: 'פיינטבול קליה 🔫',                           fri: null,                  sat: '' },
-      { time: '15:30–16:00',  thu: 'נסיעה למצוקי דרגות 🏔️',                     fri: null,                  sat: '' },
+      { time: '12:00–13:00',  thu: 'נסיעה לקליה 🏜️',                            fri: null,                  sat: '' },
+      { time: '13:00–15:00',  thu: 'פיינטבול קליה 🔫',                           fri: null,                  sat: '' },
+      { time: '15:00–16:00',  thu: 'נסיעה למצוקי דרגות 🏔️',                     fri: null,                  sat: '' },
       { time: '16:00–18:00',  thu: 'מורידים פאניקה + אלכוהול ואוכל 🪂🍺',        fri: 'מתארגנים 🏠',         sat: '' },
       { time: '18:00–20:00',  thu: 'מעיינות חמים ♨️',                           fri: 'מבשלים ושותים 🍳🍷',  sat: '' },
       { time: '20:00+',       thu: 'בר של המקום 🍹',                             fri: 'אוכל + שותים 🍻',     sat: '' },
@@ -415,9 +427,9 @@
         events: [
           { time: '9:00–11:00',  text: 'סופר',                              icon: '🛒' },
           { time: '11:00–12:00', text: 'איסוף חתנים ויציאה מתא',            icon: '🚗' },
-          { time: '12:00–14:00', text: 'נסיעה לקליה',                       icon: '🏜️' },
-          { time: '14:00–15:30', text: 'פיינטבול קליה',                     icon: '🔫' },
-          { time: '15:30–16:00', text: 'נסיעה למצוקי דרגות',                icon: '🏔️' },
+          { time: '12:00–13:00', text: 'נסיעה לקליה',                       icon: '🏜️' },
+          { time: '13:00–15:00', text: 'פיינטבול קליה',                     icon: '🔫' },
+          { time: '15:00–16:00', text: 'נסיעה למצוקי דרגות',                icon: '🏔️' },
           { time: '16:00–18:00', text: 'מורידים פאניקה + אלכוהול ואוכל',   icon: '🪂🍺' },
           { time: '18:00–20:00', text: 'מעיינות חמים',                      icon: '♨️' },
           { time: '20:00+',      text: 'בר של המקום',                       icon: '🍹' },
@@ -426,7 +438,7 @@
       {
         key: 'fri', name: 'שישי', emoji: '🌊', color: '#00aaff',
         events: [
-          { time: 'בוקר',        text: 'טיול',                   icon: '🥾' },
+          { time: 'בוקר',        text: 'טיול בנחל תקוע/שיטפון',                   icon: '🥾' },
           { time: '16:00–18:00', text: 'מתארגנים',               icon: '🏠' },
           { time: '18:00–20:00', text: 'מבשלים ושותים',           icon: '🍳🍷' },
           { time: '20:00+',      text: 'אוכל + שותים',            icon: '🍻' },
@@ -438,7 +450,7 @@
       {
         key: 'sat', name: 'שבת', emoji: '🌙', color: '#ff55bb',
         events: [
-          { time: 'בוקר',  text: 'ארוחת בוקר ושיל', icon: '🍳' },
+          { time: 'בוקר',  text: 'שקשוקי ושיל', icon: '🍳' },
           { time: 'מאוחר', text: 'נוסעים הביתה',    icon: '🏠' },
         ],
       },
@@ -508,7 +520,7 @@
           ═══════════════════════════════════════════ */}
           <section className="hero">
             <div className="hero-photos">
-              <img className="hero-photo" src="./assets/beni_netta.jpg" alt="בני ונטה" />
+              <img className="hero-photo" src="./assets/beni_netta.jpg" alt="בני ונטע" />
               <img className="hero-photo" src="./assets/yahav_aya.jpg"  alt="יהב ואיה" />
               <div className="hero-seam" />
             </div>
